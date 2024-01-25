@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block container %}
+<h1 class="title">
+    Life Expectancy Plotly Dash Sample
+</h1>
+<div class="row">
+     <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
+        <a href="/table/">
+            <img src="/static/images/plots.png" alt="" class="img-fluid card-img-top">
+            <h2 class="icon-title">Table</h2>
+        </a>
+    </div>
+    <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
+        <a href="/histogram/">
+            <img src="/static/images/plots.png" alt="" class="img-fluid card-img-top">
+            <h2 class="icon-title">Histogram</h2>
+        </a>    
+    </div>
+    <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
+        <a href="/plots/">
+            <img src="/static/images/plots.png" alt="" class="img-fluid card-img-top">
+            <h2 class="icon-title">All Plots</h2>
+        </a>
+    </div>
+</div>
+
+{% endblock %}
