@@ -18,8 +18,36 @@ def dash_render_table(flask_app, path):
 
     app.layout = html.Div([
         html.H1("Life Expectancy by Country", style={"text-align": 'center'}),
+
         dash_table.DataTable(data=df.to_dict('records'), page_size=20),
     ])
+    return app.server
+
+
+def dash_relationship(flask_app, path):
+    app = Dash(
+        __name__,
+        server=flask_app,
+        url_base_pathname=path,
+        external_stylesheets=[dbc.themes.BOOTSTRAP],
+    )
+
+    app.layout = html.Div([
+        html.Br(),
+        "X-Axis", dcc.Dropdown(id="x_axis", options=[{"label": "Year", "value": "Year"}, {"label": "GDP", "value": "GDP"}],
+                               value="Year", clearable=False),
+        "Y-Axis", dcc.Dropdown(id="y_axis", options=[{"label": "Year", "value": "Year"}, {"label": "GDP", "value": "GDP"}],
+                               value="GDP", clearable=False),
+        dcc.Graph(id="scatter")
+    ])
+
+    def create_scatter_chart(x_axis="Year", y_axis="GDP"):
+        return px.scatter(data_frame=df, x=x_axis, y=y_axis, height=600)
+
+    @callback(Output("scatter", "figure"), [Input("x_axis", "value"), Input("y_axis", "value")])
+    def update_scatter_chart(x_axis, y_axis):
+        return create_scatter_chart(x_axis, y_axis)
+
     return app.server
 
 
@@ -55,7 +83,6 @@ def dash_plots(flask_app, path):
 
     app.layout = html.Div([
         html.H1("Life Expectancy by Country", style={"text-align": 'center'}),
-
         dcc.Dropdown(
             id='analysis-dropdown',
             options=[
@@ -65,6 +92,7 @@ def dash_plots(flask_app, path):
             value='Life expectancy at birth (years)',
             style={'width': '50%', 'margin': '20px auto'}
         ),
+
         dcc.Graph(id='line-chart', style={'width': '50%'}),
         dcc.Graph(id='scatter-plot'),
         dcc.Graph(id='bar-chart'),
