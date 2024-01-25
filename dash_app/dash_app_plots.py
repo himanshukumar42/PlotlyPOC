@@ -7,9 +7,8 @@ import pandas as pd
 url = "https://github.com/JaziDesigns/Datasets/raw/main/all_data.csv"
 df = pd.read_csv(url)
 
+columns = df.columns.tolist()
 
-years = list(df.Year.drop_duplicates())
-years.sort()
 
 def dash_render_table(flask_app, path):
     app = Dash(
@@ -27,8 +26,12 @@ def dash_render_table(flask_app, path):
     return app.server
 
 
+def create_scatter_chart(x_axis="Year", y_axis="GDP"):
+    global df
+    return px.scatter(data_frame=df, x=x_axis, y=y_axis)
+
+
 def dash_relationship(flask_app, path):
-    print("** NEW**", df['Year'])
     app = Dash(
         __name__,
         server=flask_app,
@@ -36,20 +39,20 @@ def dash_relationship(flask_app, path):
         external_stylesheets=[dbc.themes.BOOTSTRAP],
     )
 
+    x_axis = dcc.Dropdown(id="x_axis", options=columns, value="Year", clearable=False)
+    y_axis = dcc.Dropdown(id="y_axis", options=columns, value="GDP", clearable=False)
+
     app.layout = html.Div([
-        html.Br(),
-        "X-Axis", dcc.Dropdown(id="x_axis", options=[{"label": "Year", "value": "Year"}, {"label": "GDP", "value": "GDP"}],
-                               value="Year", clearable=False),
-        "Y-Axis", dcc.Dropdown(id="y_axis", options=[{"label": "Year", "value": "Year"}, {"label": "GDP", "value": "GDP"}],
-                               value="GDP", clearable=False),
-        dcc.Graph(id="scatter")
+        html.H1(className='main-title', children='Global Life Expectancy'),
+        x_axis,
+        y_axis,
+        dcc.Graph(id="scatterplot")
     ])
 
-    def create_scatter_chart(x_axis="Year", y_axis="GDP"):
-        return px.scatter(data_frame=df, x=x_axis, y=y_axis, height=600)
-
-    @callback(Output("scatter", "figure"), [Input("x_axis", "value"), Input("y_axis", "value")])
-    def update_scatter_chart(x_axis, y_axis):
+    @app.callback(
+        Output("scatterplot", "figure"),
+        [Input("x_axis", "value"), Input("y_axis", "value")])
+    def update_scatter_chart(x_axis="Year", y_axis="GDP"):
         print("******************* HORRAY ************")
         return create_scatter_chart(x_axis, y_axis)
 
@@ -177,7 +180,7 @@ def dash_plots(flask_app, path):
 
     @app.callback(
         Output('line-chart', 'figure'),
-        [Input('analysis-dropdown', 'value'),]
+        [Input('analysis-dropdown', 'value'), ]
     )
     def update_line_chart(selected_parameter):
         fig = px.line(df, x='Year', y=selected_parameter, color='Country', title=f'{selected_parameter} Over Time')
