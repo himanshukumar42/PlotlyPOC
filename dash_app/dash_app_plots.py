@@ -26,11 +26,6 @@ def dash_render_table(flask_app, path):
     return app.server
 
 
-def create_scatter_chart(x_axis="Year", y_axis="GDP"):
-    global df
-    return px.scatter(data_frame=df, x=x_axis, y=y_axis)
-
-
 def dash_relationship(flask_app, path):
     app = Dash(
         __name__,
@@ -46,14 +41,20 @@ def dash_relationship(flask_app, path):
         html.H1(className='main-title', children='Global Life Expectancy'),
         x_axis,
         y_axis,
-        dcc.Graph(id="scatterplot")
+        dcc.Graph(id="scatterplot", clickData={'points': [{'customdata': 'default_value'}]})
     ])
+
+    def create_scatter_chart(x_axis="Year", y_axis="GDP"):
+        global df
+        return px.scatter(data_frame=df, x=x_axis, y=y_axis, custom_data=['Country', 'Year', 'Life expectancy at birth (years)', 'GDP'])
+
 
     @app.callback(
         Output("scatterplot", "figure"),
-        [Input("x_axis", "value"), Input("y_axis", "value")])
-    def update_scatter_chart(x_axis="Year", y_axis="GDP"):
-        print("******************* HORRAY ************")
+        [Input("x_axis", "value"), Input("y_axis", "value"), Input("scatterplot", "clickData")])
+    def update_scatter_chart(x_axis="Year", y_axis="GDP", click_data=None):
+        if click_data:
+            selected_point_data = click_data['points'][0]['customdata']
         return create_scatter_chart(x_axis, y_axis)
 
     return app.server
@@ -69,13 +70,12 @@ def dash_histogram(flask_app, path):
     app.layout = html.Div([
         html.Br(),
         html.P("Select Column: "),
-        dcc.Dropdown(id="dist_column", options=["Life expectancy at birth (years)", "GDP"]),
+        dcc.Dropdown(id="dist_column", options=["Life expectancy at birth (years)", "GDP"], value="GDP"),
         dcc.Graph(id="histogram")
     ])
 
     @app.callback(Output('histogram', 'figure'), [Input('dist_column', 'value')])
     def update_histogram(dist_column="GDP"):
-        print("******************* HORRAY Histogram************")
 
         return px.histogram(data_frame=df, x=dist_column, height=600)
 
@@ -163,6 +163,16 @@ def dash_plots(flask_app, path):
         dcc.Graph(id='box-plot'),
         dcc.Graph(id='choropleth-map'),
         dcc.Graph(id="sunburst-chart"),
+        dcc.Dropdown(
+            id='country-dropdown',
+            options=[{'label': country, 'value': country} for country in df['Country'].unique()],
+            value=df['Country'].unique()[0],
+            multi=False,
+            style={'width': '130px', 'display': 'inline-block', 'margin-top': '2%', 'z-index': '1'}
+        ),
+        dcc.Graph(id='pie-chart', clickData=None),
+
+        html.Div(id='details-output', style={'textAlign': 'center'}),
         dcc.Link(
             dbc.Button("To main Page", className="button-text"),
             href="/",
@@ -231,4 +241,16 @@ def dash_plots(flask_app, path):
                           title=f'Sunburst Chart of {selected_parameter}')
         return fig
 
+    @app.callback([Output('pie-chart', 'figure'), Output('details-output', 'figure')], [Input('country-dropdown', 'value'), Input('pie-chart', 'clickData')])
+    def update_pier_chart(selected_country="Chile", click_data=None):
+        filtered_df = df[df['Country'] == selected_country]
+        fig = px.pie(filtered_df, values='GDP', names='Year', title=f'GDP distribution for {selected_country}')
+
+        details = ""
+        if click_data:
+            selected_year = click_data['points'][0]['label']
+            selected_gdp = filtered_df[filtered_df['Year'] == int(selected_year)]['GDP'].values[0]
+            details = f"Selected Year: {selected_year}<br>Selected GDP: {selected_gdp}"
+
+        return fig, details
     return app.server

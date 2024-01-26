@@ -37,7 +37,6 @@ app.layout = html.Div([
 
 @callback(Output("scatter", "figure"), [Input("x_axis", "value"), Input("y_axis", "value")])
 def update_scatter_chart(x_axis, y_axis):
-    print("******************* HORRAY ************")
     return create_scatter_chart(x_axis, y_axis)
 
 if __name__ == '__main__':
