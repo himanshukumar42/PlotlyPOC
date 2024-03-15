@@ -1,0 +1,12 @@
+{
+    "http://13.234.67.244/": {
+        "server_url": "http://13.234.67.244/",
+        "filename": "/Users/himanshu/PycharmProjects/PlotlyPOC",
+        "app_url": "http://13.234.67.244/content/fbded059-9490-46db-b899-4e614a7d4fe7/",
+        "app_id": 5,
+        "app_guid": "fbded059-9490-46db-b899-4e614a7d4fe7",
+        "title": "PlotlyPOC",
+        "app_mode": "python-api",
+        "app_store_version": 1
+    }
+}ig
