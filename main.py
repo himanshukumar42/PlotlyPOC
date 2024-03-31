@@ -18,6 +18,9 @@ dash_house_table(server, path='/house/')
 def index():
     return render_template('index.html')
 
+@server.route("/healthz")
+def healthz():
+    return "Health check"
 
 if __name__ == '__main__':
     server.run(host='0.0.0.0', port=80)
