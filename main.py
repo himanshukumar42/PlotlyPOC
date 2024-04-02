@@ -22,5 +22,9 @@ def index():
 def healthz():
     return "Health check"
 
+@server.route("/posit")
+def posit():
+    return "Posit Connect"
+
 if __name__ == '__main__':
     server.run(host='0.0.0.0', port=80)
